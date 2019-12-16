@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
 # searchAgents.py
 # ---------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -301,22 +301,34 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0  # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
-        "*** YOUR CODE HERE ***"
+        self.top = top  # 迷宫的top，上边界坐标
+        self.right = right  # 迷宫的right，右边界坐标
+
+        """
+        状态的表示方法
+        每个状态为一个形如(coord, foods_statebool)的二元组,其中coord为吃豆人所在的位置坐标
+        foods_statebool为食物的状态,foods_statebool与self.corners((1,1), (1,top), (right, 1), (right, top))
+        位置一一对应，若对应位置的食物未被吃掉，则foods_statebool中对应项为False,若已经被吃
+        则foods_statebool中对应项为True
+        """
+        # 初始状态
+        self.start_state = (startingGameState.getPacmanPosition(),
+                            [False, False, False, False])
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.start_state
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # 根据状态表示方法,state[1]即为foods_statebool,若其中每一项均为True,则
+        # 说明角落的食物均已被吃掉,目标达成
+        return state[1][0] and state[1][1] and state[1][2] and state[1][3]
 
     def getSuccessors(self, state):
         """
@@ -328,8 +340,15 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-
         successors = []
+        x, y = state[0]  # 获得坐标
+        foodBool = state[1]  # 获得剩余角落食物状态
+        foodXYList = []
+        num = 0
+        for food in foodBool:
+            if not food:
+                foodXYList.append(self.corners[num])
+            num += 1
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -337,8 +356,15 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
+            dx, dy = Actions.directionToVector(action)  # 将action解析为坐标增量
+            nextx, nexty = int(x + dx), int(y + dy)  # 获得执行action之后的坐标
+            hitsWall = self.walls[nextx][nexty]  # hitsWall即为walls网格中(nextx, nexty)处的布尔值
+            if not hitsWall:  # hitsWall为True表示有墙,为False表示无墙,此处需要其无墙
+                nextState = (nextx, nexty)
+                leftFoodBool = foodBool[:]  # 需要进行浅拷贝,否则会出错
+                if nextState in foodXYList:  # 判断(nextx, nexty)是否在剩余的食物坐标列表当中
+                    leftFoodBool[self.corners.index((nextx, nexty))] = True  # 若是,将其从列表中删去,表示该角落已到达
+                successors.append(((nextState, leftFoodBool), action, 1))  # 将下一状态加入successors
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -372,9 +398,53 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners  # These are the corner coordinates
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
+    coord, food_state = state  # coord即为吃豆人的当前位置坐标
+    food_lst = []
+    count = 0
+    for fstate in food_state:
+        if not fstate:
+            food_lst.append(corners[count])  # 获得剩余的角落坐标列表
+        count += 1
+    top = problem.top
+    right = problem.right
+    # 下面3行代码对迷宫的长和宽进行比较,找出较长边和较短边
+    width_length = [top, right]
+    width = min(width_length)
+    length = max(width_length)
 
-    "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    food_num = len(food_lst)  # 剩余角落食物数量
+    if food_num == 0:  # 剩余0个,说明达成目标,返回0
+        return 0
+    elif food_num == 1:  # 剩余1个,返回当前位置coord到剩余的这个角落的曼哈顿距离
+        return util.manhattanDistance(coord, food_lst[0])
+    # 剩余2个,返回距离当前位置较近的角落到coord的曼哈顿距离与剩余的两个角落之间的曼哈顿距离的和
+    elif food_num == 2:
+        dist = []
+        dist.append(util.manhattanDistance(coord, food_lst[0]))
+        dist.append(util.manhattanDistance(coord, food_lst[1]))
+        mindist = min(dist)
+        return mindist + util.manhattanDistance(food_lst[0], food_lst[1])
+    elif food_num == 3:  # 剩余3个的处理方法有些麻烦,请见报告说明
+        leftsidefood = []
+        food_lstset = set(food_lst)
+        if food_lstset == {(1, 1), (1, top), (right, 1)} or food_lstset == {(right, top), (1, top),
+                                                                            (right, 1)}:
+            leftsidefood = [(1, top), (right, 1)]
+        elif food_lstset == {(1, 1), (1, top), (right, top)} or food_lstset == {(1, 1),
+                                                                                (right, top),
+                                                                                (right, 1)}:
+            leftsidefood = [(1, 1), (right, top)]  # 得到非中间位置的角落坐标列表
+        man_dist_lst = min(util.manhattanDistance(coord, leftsidefood[0]),
+                           util.manhattanDistance(coord, leftsidefood[1]))
+        return man_dist_lst + top - 1 + right - 1
+    elif food_num == 4:
+        man_dist_lst = min(util.manhattanDistance(coord, food_lst[0]),
+                           util.manhattanDistance(coord, food_lst[1]),
+                           util.manhattanDistance(coord, food_lst[2]),
+                           util.manhattanDistance(coord, food_lst[3]))
+
+        return man_dist_lst + 2 * (width - 1) + length - 1
+    # return 0 # Default to trivial solution
 
 
 class AStarCornersAgent(SearchAgent):
@@ -474,8 +544,16 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+
+    ans = 0
+    for x in range(foodGrid.width):
+        for y in range(foodGrid.height):
+            if foodGrid.data[x][y] == True:
+                # dis = abs(x - position[0]) + abs(y - position[1])
+                dis = mazeDistance((x, y), position, problem.startingGameState)
+                if ans < dis:
+                    ans = dis
+    return ans
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -501,14 +579,48 @@ class ClosestDotSearchAgent(SearchAgent):
         Returns a path (a list of actions) to the closest dot, starting from
         gameState.
         """
+
         # Here are some useful elements of the startState
         startPosition = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        mindis = 10000
+        xindex = 0
+        yindex = 0
+        for x in range(food.width):
+            for y in range(food.height):
+                if food.data[x][y] == True:
+                    dis = abs(x - startPosition[0]) + abs(y - startPosition[1])
+                    if dis < mindis:
+                        mindis = dis
+                        xindex = x
+                        yindex = y
+
+        # assert not walls[xindex][yindex], 'point1 is a wall: ' + str(point1)
+        assert not walls[xindex][yindex], 'point [' + xindex + '][' + yindex + '] is a wall.'
+        prob = PositionSearchProblem(gameState, start=startPosition, goal=(xindex, yindex),
+                                     warn=False, visualize=False)
+        ans = search.bfs(prob)
+        return ans
+
+        '''
+        # Here are some useful elements of the startState
+        position = gameState.getPacmanPosition()  # 当前吃豆人的位置坐标
+        food = gameState.getFood()
+        #walls = gameState.getWalls()
+        #problem = AnyFoodSearchProblem(gameState)
+        x, y = position
+        if food[x][y]:  # 若吃豆人当前位置有食物
+            gameState.getFood()[x][y] = False  # 将food[x][y]置为False，表示食物被吃掉了
+        if gameState.getFood().count() == 0:  # 若食物数量为0，表示目标已达成，返回空列表
+            return []
+        else:
+            # 使用广度优先搜索算法，确保能搜索到最优解，即最靠近当前位置的食物，返回
+            # 从当前位置到最近食物位置需执行的action列表
+            return search.bfs(AnyFoodSearchProblem(gameState))
+        '''
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -543,9 +655,13 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x, y = state
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
+        '''
+        if self.food.count == 1 and state == self.food[0].position or self.food.count == 0:
+            return True;
+        else: 
+            return False
+        '''
 
 
 def mazeDistance(point1, point2, gameState):
