@@ -86,37 +86,34 @@ def nullHeuristic(state, problem=None):
 def depthFirstSearch(problem):
     """
     深度优先搜索算法
-    实例化类GenericSearch为dfs, 使用util.py中定义的数据结构栈Stack来作为open表的数据结构
+    使用util.py中定义的数据结构栈Stack来作为open表的数据结构
 
     @param problem:     搜索算法要解决的问题对象
     @return:            actions列表,即,吃豆人吃到豆子所执行的一个action序列
     """
-    dfs = GenericSearch(problem, util.Stack)
-    return dfs.genericSearch()
+    return genericSearch(problem, util.Stack())
 
 
 def breadthFirstSearch(problem):
     """
     广度优先搜索算法
-    实例化类GenericSearch为bfs,使用util.py中定义的数据结构队列Queue来作为open表的数据结构
+    使用util.py中定义的数据结构队列Queue来作为open表的数据结构
 
     @param problem:     搜索算法要解决的问题对象
     @return:            actions列表,即,吃豆人吃到豆子所执行的一个action序列
     """
-    bfs = GenericSearch(problem, util.Queue)
-    return bfs.genericSearch()
+    return genericSearch(problem, util.Queue())
 
 
 def uniformCostSearch(problem):
     """
     代价一致搜索算法
-    实例化类GenericSearch为ucs,使用util.py中定义的数据结构优先队列PriorityQueue来作为open表的数据结构
+    使用util.py中定义的数据结构优先队列PriorityQueue来作为open表的数据结构
 
     @param problem:     搜索算法要解决的问题对象
     @return:            actions列表,即,吃豆人吃到豆子所执行的一个action序列
     """
-    ucs = GenericSearch(problem, util.PriorityQueue, True)
-    return ucs.genericSearch()
+    return genericSearch(problem, util.PriorityQueue(), True)
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
@@ -130,62 +127,40 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     @param heuristic:   启发式函数对象
     @return:            actions列表,即,吃豆人吃到豆子所执行的一个action序列
     """
-    astar = GenericSearch(problem, util.PriorityQueue, True, heuristic)
-    return astar.genericSearch()
+    return genericSearch(problem, util.PriorityQueue(), True, heuristic)
 
 
-class GenericSearch:
+def genericSearch(problem, open_lst, pri_queue=False, heuristic=nullHeuristic):
     """
-    通用的搜索算法类,通过配置不同的参数可以实现DFS,BFS,UCS,A*搜索
+    通过配置不同的输入参数，实现DFS,BFS,UCS,A*搜索
+    state:              吃豆人目前坐标
+    actions:            从初始结点到当前坐标的操作序列，形如["South","North",....]
+    cost:               对于UCS，其为从初始结点到当前结点的代价
+                        对于A*，其为从初始结点到当前结点的代价+启发式函数值
+    DFS and BFS:        open表中节点为(state, actions)元组
+    UCS and A*:         open表中节点为((state, actions),cost)元组，传入push函数参数个数为2
+
+    @param problem:     搜索算法要解决的问题对象
+    @param open_lst:    搜索算法中的open表采用的数据结构
+    @param pri_queue:   bool值,默认False,是否采用优先队列数据结构,用于代价一致搜索和A*搜索算法
+    @param heuristic:   默认为nullHeuristic函数，是启发式函数，用于A*和UCS算法
+    @return:            actions列表
     """
-
-    def __init__(self, problem, struct_type, use_pri_queue=False, heuristic=nullHeuristic):
-        """
-        不同的参数可实现不同的搜索策略：DFS、BFS、UCS、A*算法
-
-        @param problem:         搜索算法要解决的问题对象
-        @param struct_type:     搜索算法中的open表采用的数据结构
-        @param use_pri_queue:   bool值,默认False,是否采用优先队列数据结构,用于代价一致搜索和A*搜索算法
-        @param heuristic:       默认为nullHeuristic函数，是启发式函数，用于A*和UCS算法
-        """
-        self.problem = problem
-        self.struct_type = struct_type
-        self.use_pri_queue = use_pri_queue
-        self.heuristic = heuristic
-
-    def genericSearch(self):
-        """
-        state:      吃豆人目前坐标
-        actions:    从初始结点到当前坐标的操作序列，形如["South","North",....]
-        cost:       对于UCS，其为从初始结点到当前结点的代价
-                    对于A*，其为从初始结点到当前结点的代价+启发式函数值
-        DFS+BFS:    open表中节点为(state, actions)二元组
-        UCS+A*:     open表中节点为((state, actions),cost)二元组
-
-        @return:    actions列表
-        """
-        open_lst, close_lst = self.struct_type, []
-        item = (self.problem.getStartState, [])
-        open_lst.push((item, self.heuristic(self.problem.getStartState, self.problem))
-                      if self.use_pri_queue else item)
-        while True:
-            if open_lst.isEmpty():  # 如果open表为空，则搜索问题无解
-                return []
-            coord, actions = open_lst.pop()
-            if self.problem.isGoalState(coord):
-                return actions
-            if coord not in close_lst:  # 若当前结点不在closed表中
-                close_lst.append(coord)  # 将当前结点加入closed表,coord=(x,y)
-                for successor_coord, action, step_cost in self.problem.getSuccessors(coord):
-                    # 遍历当前结点的后继节点for example, problem.getSuccessors(coord) = [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
-                    if self.use_pri_queue:
-                        # 若使用优先队列，则在push时要给出优先级信息,为从起始节点通过actions到达当前结点的代价
-                        # 加以当前结点为参数的启发式函数的值,即((state, actions),cost)
-                        open_lst.push((successor_coord, actions + [action]),
-                                      self.problem.getCostOfActions(actions + [action]) +
-                                      self.heuristic(successor_coord, self.problem))
-                    else:
-                        open_lst.push((successor_coord, actions + [action]))
+    close_lst, item = [], (problem.getStartState(), [])
+    open_lst.push(item, heuristic(problem.getStartState(), problem)) if pri_queue \
+        else open_lst.push(item)
+    while True:
+        if open_lst.isEmpty():  # 若open表为空，则搜索问题无解
+            return []
+        coord, actions = open_lst.pop()
+        if problem.isGoalState(coord):
+            return actions
+        if coord not in close_lst:  # 若当前结点不在close表中
+            close_lst.append(coord)  # 将当前结点坐标加入close表
+            for successor_coord, action, step_cost in problem.getSuccessors(coord):
+                item = (successor_coord, actions + [action])
+                open_lst.push(item, problem.getCostOfActions(actions + [action]) + heuristic(
+                    successor_coord, problem)) if pri_queue else open_lst.push(item)
 
 
 bfs = breadthFirstSearch
