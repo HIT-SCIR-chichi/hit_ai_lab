@@ -257,7 +257,7 @@ class GameState:
 #                     THE HIDDEN SECRETS OF PACMAN                         #
 #                                                                          #
 # You shouldn't need to look through the code in this section of the file. #
-############################################################################
+###########################################sea#################################
 
 SCARED_TIME = 40    # Moves ghosts are scared
 COLLISION_TOLERANCE = 0.7 # How close ghosts must be to Pacman to kill
@@ -484,7 +484,7 @@ def readCommand( argv ):
                     - starts an interactive game
                 (2) python pacman.py --layout smallClassic --zoom 2
                 OR  python pacman.py -l smallClassic -z 2
-                    - starts an interactive game on a smaller board, zoomed in
+                    - starts an interactive game on a smaller board, zoomed inin
     """
     parser = OptionParser(usageStr)
 
