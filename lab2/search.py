@@ -77,32 +77,52 @@ def tinyMazeSearch(problem):
 
 def depthFirstSearch(problem):
     """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    深度优先搜索算法
+    实例化类GenericSearch为dfs,使用util.py中定义的
+    数据结构栈Stack来作为open表的数据结构
+    param: problem 搜索算法要解决的问题对象
+    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    dfs = GenericSearch(problem, util.Stack)
+    return dfs.genericSearch()
 
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    广度优先搜索算法
+    实例化类GenericSearch为bfs,使用util.py中定义的
+    数据结构队列Queue来作为open表的数据结构
+    param: problem 搜索算法要解决的问题对象
+    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
+    """
+    bfs = GenericSearch(problem, util.Queue)
+    return bfs.genericSearch()
 
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """
+    代价一致搜索算法
+    实例化类GenericSearch为ucs,使用util.py中定义的
+    数据结构优先队列PriorityQueue来作为open表的数据结构
+    param: problem 搜索算法要解决的问题对象
+    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
+    """
+    ucs = GenericSearch(problem, util.PriorityQueue, True)
+    return ucs.genericSearch()
+
+
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """
+    A*算法
+    实例化类GenericSearch为astar,使用util.py中定义的
+    数据结构优先队列PriorityQueue来作为open表的数据结构
+    同时指定启发式函数heuristic,使用该启发式函数来估算当前结点到目标结点的代价
+    param1: problem 搜索算法要解决的问题对象
+    param2: heuristic 启发式函数对象
+    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
+    """
+    astar = GenericSearch(problem, util.PriorityQueue, True, heuristic)
+    return astar.genericSearch()
 
 
 def nullHeuristic(state, problem=None):
@@ -111,12 +131,6 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
-
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
 
 class GenericSearch:
@@ -194,57 +208,6 @@ class GenericSearch:
                         openList.push((successor_coord, actions + [action]))
 
 
-def depthFirstSearch(problem):
-    """
-    深度优先搜索算法
-    实例化类GenericSearch为dfs,使用util.py中定义的
-    数据结构栈Stack来作为open表的数据结构
-    param: problem 搜索算法要解决的问题对象
-    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
-    """
-    dfs = GenericSearch(problem, util.Stack)
-    return dfs.genericSearch()
-
-
-def breadthFirstSearch(problem):
-    """
-    广度优先搜索算法
-    实例化类GenericSearch为bfs,使用util.py中定义的
-    数据结构队列Queue来作为open表的数据结构
-    param: problem 搜索算法要解决的问题对象
-    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
-    """
-    bfs = GenericSearch(problem, util.Queue)
-    return bfs.genericSearch()
-
-
-def uniformCostSearch(problem):
-    """
-    代价一致搜索算法
-    实例化类GenericSearch为ucs,使用util.py中定义的
-    数据结构优先队列PriorityQueue来作为open表的数据结构
-    param: problem 搜索算法要解决的问题对象
-    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
-    """
-    ucs = GenericSearch(problem, util.PriorityQueue, True)
-    return ucs.genericSearch()
-
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    """
-    A*算法
-    实例化类GenericSearch为astar,使用util.py中定义的
-    数据结构优先队列PriorityQueue来作为open表的数据结构
-    同时指定启发式函数heuristic,使用该启发式函数来估算当前结点到目标结点的代价
-    param1: problem 搜索算法要解决的问题对象
-    param2: heuristic 启发式函数对象
-    return值: actions列表,即,吃豆人吃到豆子所执行的一个action序列
-    """
-    astar = GenericSearch(problem, util.PriorityQueue, True, heuristic)
-    return astar.genericSearch()
-
-
-# Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
