@@ -1,3 +1,8 @@
 *.docx
 /.gitignore
 /.idea
+/.idea
+*.pyc
+*.zip
+/.vscode
+HIT_AI_Lab-master/
