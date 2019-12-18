@@ -1,13 +1,14 @@
+# -*- coding: utf-8 -*-
 from PIL import Image, ImageTk
 from tkinter import ttk
 from AI_Lab1 import run
 import tkinter as tk
 import time
 
-width, height = 960, 540
 Pos = ['A', 'B', 'C']  # 默认位置A在最左边，B在中间，C在最右边
-On_Box = ['否', '是']
 Rate = 100  # 刷新时间单位为ms
+width, height = 960, 540
+On_Box = ['否', '是']
 
 
 def run_model():
