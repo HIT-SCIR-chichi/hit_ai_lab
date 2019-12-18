@@ -5,17 +5,16 @@ from system import run
 import tkinter as tk
 import time
 
-# TODO:添加位置描述，A、B、C
 Start_State = ('A', 'B', 'C', '否')
 Pos = ['A', 'B', 'C']  # 默认位置A在最左边，B在中间，C在最右边
-Rate = 100  # 刷新时间单位为ms
+Rate = 500  # 刷新时间单位为ms
 width, height = 960, 540
 On_Box = ['否', '是']
 Font = 'Arial, 10'
 Fg = 'green'
 
 
-def set_pos(start_state):  # 根据状态设置图像位置
+def set_img(start_state):  # 根据状态设置图像位置
     p_monkey, p_box, p_banana, is_on_box = start_state
     ii, jj, kk = Pos.index(p_monkey) * 2 + 1, Pos.index(p_box) * 2 + 1, Pos.index(p_banana) * 2 + 1
     aa = On_Box.index(is_on_box) * img_1.height()
@@ -73,12 +72,13 @@ def add_display():
 
 def run_model():
     start_state = (monkey_combo.get(), box_combo.get(), banana_combo.get(), is_on_box_combo.get())
-    set_pos(start_state)
+    set_img(start_state)
     system = run(start_state)
     for idx, (state, route) in enumerate(zip(system.states, system.routes)):
         time.sleep(Rate / 1000)  # 这里采用暴力的阻塞式睡眠
-        set_pos(state)
+        set_img(state)
         set_txt(idx, state, route)
+        root.update()
     return system.states, system.routes
 
 
@@ -92,6 +92,7 @@ canvas = tk.Canvas(root, width=width, height=height)
 canvas.place(x=0, y=0)
 for i in range(1, 4):
     canvas.create_line(i * width / 4, 0, i * width / 4, height, fill='green', width=1)
+    canvas.create_text((2 * i - 1) * width / 8, height / 3 + 50, text=Pos[i - 1])
 for i in range(1, 3):
     canvas.create_line(0, i * height / 3, width, i * height / 3, fill='green', width=1)
 
@@ -101,7 +102,7 @@ img_2 = ImageTk.PhotoImage(Image.open('./image/banana.jpg').resize((100, 50), Im
 monkey_img = tk.Label(root, image=img_0)
 box_img = tk.Label(root, image=img_1)
 banana_img = tk.Label(root, image=img_2)
-set_pos(Start_State)
+set_img(Start_State)
 
 run_button = tk.Button(root, text='运行', command=run_model, font=Font, fg=Fg)
 run_button.place(x=7 * width / 8 - 25, y=0)

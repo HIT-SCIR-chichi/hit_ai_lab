@@ -8,12 +8,8 @@ class System:
             z表示香蕉位置，取值范围['A','B','C']
             w表示猴子是否在箱子上，取值范围['是','否']
         Routes中每一个元素均为要输出的合适的操作语句，可取的文字为
-            猴子目前在%s处
-            猴子到%s处
-            猴子推着箱子到%s处
-            猴子爬上箱子
-            猴子从箱子上爬下来
-            猴子拿到了香蕉
+            猴子目前在%s处、猴子到%s处、猴子推着箱子到%s处
+            猴子爬上箱子、猴子从箱子上爬下来、猴子拿到了香蕉
     """
 
     def __init__(self, start_state, start_route):
@@ -25,7 +21,6 @@ class System:
         self.__states.append(state)
         self.__routes.append(route)
         self.__count += 1
-        print(state)
 
     @property
     def states(self):
@@ -44,38 +39,39 @@ class System:
     """
     表示猴子运动的函数
     """
-    def monkey_goto(self, x):
-        oldstates = self.current_state()
-        newstates = (x, oldstates[1], oldstates[2], oldstates[3])
-        # 在状态列表里添加状态
-        self.append(newstates, "猴子到" + x +"处")
+
+    def monkey_go(self, x):
+        old_state = self.current_state()
+        new_state = (x, old_state[1], old_state[2], old_state[3])
+        self.append(new_state, "猴子到" + x + "处")  # 在状态列表里添加状态
 
     """
     表示猴子推箱子的函数
     """
+
     def move_box(self, y):
-        oldstates = self.current_state()
-        newstates = (y, y, oldstates[2], oldstates[3])
+        old_state = self.current_state()
+        new_state = (y, y, old_state[2], old_state[3])
         # 在状态列表里添加状态
-        self.append(newstates, "猴子推着箱子到" + y + "处")
+        self.append(new_state, "猴子推着箱子到" + y + "处")
 
     """
     表示猴子爬上箱子的函数
     """
-    def climb_onto(self):
-        oldstates = self.current_state()
-        newstates = (oldstates[0], oldstates[1], oldstates[2], '是')
-        # 在状态列表里添加状态
-        self.append(newstates, "猴子爬上箱子")
+
+    def climb_on(self):
+        old_state = self.current_state()
+        new_state = (old_state[0], old_state[1], old_state[2], '是')
+        self.append(new_state, "猴子爬上箱子")  # 在状态列表里添加状态
 
     """
     表示猴子从箱子上爬下来的函数
     """
-    def climbdown(self):
-        oldstates = self.current_state()
-        newstates = (oldstates[0], oldstates[1], oldstates[2], '否')
-        # 在状态列表里添加状态
-        self.append(newstates, "猴子从箱子上爬下来")
+
+    def climb_down(self):
+        old_state = self.current_state()
+        new_state = (old_state[0], old_state[1], old_state[2], '否')
+        self.append(new_state, "猴子从箱子上爬下来")  # 在状态列表里添加状态
 
 
 def run(start_state):  # 输入参数为含有4元组，格式如上图规约，该函数被GUI模块调用
@@ -89,24 +85,16 @@ def run(start_state):  # 输入参数为含有4元组，格式如上图规约，
     完善代码，调用system.append()修改状态，调用system.current_state()获取当前最新状态
     """
     while not (system.current_state()[0] == system.current_state()[1] and
-           system.current_state()[1] == system.current_state()[2] and system.current_state()[3] == "是"):
-        nowstate = system.current_state()
-        # 箱子和香蕉同位置
-        if nowstate[1] == nowstate[2]:
-            if nowstate[0] == nowstate[1]:  # 猴子和箱子同位置
-                system.climb_onto()
+               system.current_state()[1] == system.current_state()[2] and system.current_state()[
+                   3] == "是"):
+        now_state = system.current_state()
+        if now_state[1] == now_state[2]:  # 箱子和香蕉同位置
+            system.climb_on() if now_state[0] == now_state[1] else system.monkey_go(now_state[1])
+        else:  # 箱子和香蕉不同位置
+            if now_state[0] == now_state[1]:  # 猴子和箱子同位置
+                system.climb_down() if now_state[3] == "是" else system.move_box(now_state[2])
             else:
-                system.monkey_goto(nowstate[1])
-        # 箱子和香蕉不同位置
-        else:
-            if nowstate[0] == nowstate[1]:  # 猴子和箱子同位置
-                if nowstate[3] == "是":  # 猴子在箱子上
-                    system.climbdown()
-                else:
-                    system.move_box(nowstate[2])
-            else:
-                system.monkey_goto(nowstate[1])
-    #print(system.)
+                system.monkey_go(now_state[1])
     return system
 
 
