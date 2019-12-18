@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 class System:
     """
     要求：每次执行一个操作后，要同时修改以下两个列表
@@ -27,6 +25,7 @@ class System:
         self.__states.append(state)
         self.__routes.append(route)
         self.__count += 1
+        print(state)
 
     @property
     def states(self):
@@ -42,6 +41,42 @@ class System:
         """
         return self.__states[self.__count]
 
+    """
+    表示猴子运动的函数
+    """
+    def monkey_goto(self, x):
+        oldstates = self.current_state()
+        newstates = (x, oldstates[1], oldstates[2], oldstates[3])
+        # 在状态列表里添加状态
+        self.append(newstates, "猴子到" + x +"处")
+
+    """
+    表示猴子推箱子的函数
+    """
+    def move_box(self, y):
+        oldstates = self.current_state()
+        newstates = (y, y, oldstates[2], oldstates[3])
+        # 在状态列表里添加状态
+        self.append(newstates, "猴子推着箱子到" + y + "处")
+
+    """
+    表示猴子爬上箱子的函数
+    """
+    def climb_onto(self):
+        oldstates = self.current_state()
+        newstates = (oldstates[0], oldstates[1], oldstates[2], '是')
+        # 在状态列表里添加状态
+        self.append(newstates, "猴子爬上箱子")
+
+    """
+    表示猴子从箱子上爬下来的函数
+    """
+    def climbdown(self):
+        oldstates = self.current_state()
+        newstates = (oldstates[0], oldstates[1], oldstates[2], '否')
+        # 在状态列表里添加状态
+        self.append(newstates, "猴子从箱子上爬下来")
+
 
 def run(start_state):  # 输入参数为含有4元组，格式如上图规约，该函数被GUI模块调用
     (monkey, box, banana, on_box), pos_lst = start_state, ['A', 'B', 'C']
@@ -53,6 +88,25 @@ def run(start_state):  # 输入参数为含有4元组，格式如上图规约，
     """
     完善代码，调用system.append()修改状态，调用system.current_state()获取当前最新状态
     """
+    while not (system.current_state()[0] == system.current_state()[1] and
+           system.current_state()[1] == system.current_state()[2] and system.current_state()[3] == "是"):
+        nowstate = system.current_state()
+        # 箱子和香蕉同位置
+        if nowstate[1] == nowstate[2]:
+            if nowstate[0] == nowstate[1]:  # 猴子和箱子同位置
+                system.climb_onto()
+            else:
+                system.monkey_goto(nowstate[1])
+        # 箱子和香蕉不同位置
+        else:
+            if nowstate[0] == nowstate[1]:  # 猴子和箱子同位置
+                if nowstate[3] == "是":  # 猴子在箱子上
+                    system.climbdown()
+                else:
+                    system.move_box(nowstate[2])
+            else:
+                system.monkey_goto(nowstate[1])
+    #print(system.)
     return system
 
 
