@@ -140,15 +140,15 @@ def general_search(prob, open_lst, heuristic=nullHeuristic):
     @param heuristic:   默认为nullHeuristic函数，是启发式函数，用于A*和UCS算法
     @return:            actions列表,吃豆人吃到豆子所执行的操作序列
     """
-    close_lst, is_pri = [], isinstance(open_lst, util.PriorityQueue)
+    closed_lst, is_pri = [], isinstance(open_lst, util.PriorityQueue)
     item = (prob.getStartState(), [])
-    open_lst.push(item, heuristic(prob.getStartState(), prob)) if is_pri else open_lst.push(item)
+    open_lst.push(item, heuristic(item[0], prob)) if is_pri else open_lst.push(item)
     while not open_lst.isEmpty():
         state, actions = open_lst.pop()  # 取一个拓展节点
         if prob.isGoalState(state):  # 拓展节点为目标节点
             return actions
-        if state not in close_lst:  # 当前结点未被拓展过
-            close_lst.append(state)  # 将当前结点坐标加入close表
+        if state not in closed_lst:  # 当前结点未被拓展过
+            closed_lst.append(state)  # 将当前结点坐标加入close表
             for successor_state, action, step_cost in prob.getSuccessors(state):
                 item = (successor_state, actions + [action])
                 open_lst.push(item, prob.getCostOfActions(actions + [action]) + heuristic(
