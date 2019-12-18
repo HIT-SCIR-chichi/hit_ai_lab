@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PIL import Image, ImageTk
 from tkinter import ttk
-from AI_Lab1 import run
+from system import run
 import tkinter as tk
 import time
 
