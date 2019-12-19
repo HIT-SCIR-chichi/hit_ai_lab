@@ -601,7 +601,7 @@ class ClosestDotSearchAgent(SearchAgent):
         
         # 此处直接调用search.py中提供的A*算法计算AnyFoodSearchProblem问题
         # 即通过A*算法搜索到一个最近的豆子
-        return search.aStarSearch(problem)
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -640,7 +640,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         # for food in foods:
             # distances = distances + [(util.manhattanDistance(state, food), food)]
         # distance, food = min(distances)
-        print "dis : " + str(distance)
+        # print "dis : " + str(distance)
         # return distance == 0
 
 def mazeDistance(point1, point2, gameState):
