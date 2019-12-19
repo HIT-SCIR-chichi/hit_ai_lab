@@ -599,9 +599,9 @@ class ClosestDotSearchAgent(SearchAgent):
 
         "*** YOUR CODE HERE ***"
         
-        # 此处直接调用search.py中提供的A*算法计算AnyFoodSearchProblem问题
+        # 此处直接调用search.py中提供的UCS算法计算AnyFoodSearchProblem问题
         # 即通过A*算法搜索到一个最近的豆子
-        return search.breadthFirstSearch(problem)
+        return search.ucs(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
